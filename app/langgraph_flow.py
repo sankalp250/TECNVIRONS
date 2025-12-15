@@ -24,11 +24,17 @@ class KnowledgeBaseTool:
             "weather": "Temp 24°C, AQI 18, humidity 40% for San Francisco.",
             "pricing": "Premium automation tier starts at $99/month, includes realtime SLAs.",
             "co2": "Average manufacturing batch emits 14.3kg CO2e; offset via wind credits.",
+            "langgraph": (
+                "LangGraph is a Python framework for building LLM applications as graphs "
+                "with explicit nodes, edges, and state control. It supports branching, "
+                "tool/agent routing, retries, and streaming over graph steps."
+            ),
         }
         for key, value in catalog.items():
             if key in query.lower():
                 return f"{key.title()} data → {value}"
-        return "No exact knowledge base match; fall back to model reasoning."
+        # If no match, return empty string so the model answers directly.
+        return ""
 
 
 class ConversationOrchestrator:
@@ -45,7 +51,9 @@ class ConversationOrchestrator:
         async def router(state: ConversationState):
             last_user = _find_last_user(state["messages"])
             query = last_user.content if last_user else ""
-            contains_tool_keyword = any(k in query.lower() for k in ("weather", "pricing", "co2"))
+            contains_tool_keyword = any(
+                k in query.lower() for k in ("weather", "pricing", "co2", "langgraph", "lang graph")
+            )
             route: Literal["tool", "chat"] = "tool" if contains_tool_keyword else "chat"
             return {"route": route}
 
