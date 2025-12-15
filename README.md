@@ -76,7 +76,7 @@ python -m http.server 4173
 ```
 
 Once opened:
-1. Keep `ws://localhost:8000` unless deploying elsewhere.
+1. For local dev keep `ws://localhost:8000`; in production with Render use `wss://tecnvirons.onrender.com`.
 2. Generate a session ID (or paste your own) and click **Connect**.
 3. Type a prompt. The UI streams AI tokens live; `[END_OF_RESPONSE]` is handled automatically.
 4. Use **Disconnect** to trigger the backend’s post-session summary.
