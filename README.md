@@ -81,6 +81,10 @@ Once opened:
 3. Type a prompt. The UI streams AI tokens live; `[END_OF_RESPONSE]` is handled automatically.
 4. Use **Disconnect** to trigger the backend’s post-session summary.
 
+### Deploying on Render (backend) + Vercel (frontend)
+- **Backend (Render)**: the repo includes `render.yaml`. On Render, create a new Web Service from the GitHub repo, set the environment to Python, and add env vars: `GROQ_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and (optional) `GROQ_MODEL` / `SUPABASE_SCHEMA`. Render will run `uvicorn app.main:app --host 0.0.0.0 --port 10000`. Health check: `/healthz`.
+- **Frontend (Vercel)**: create a new Vercel project pointing to `frontend/`. Framework: “Other” (no build). Output/public dir: `frontend`. In the UI, set the WebSocket host to your Render URL using `wss://<render-app>.onrender.com`.
+
 ### Testing the Flow
 1. Send a prompt mentioning “weather”, “pricing”, or “co2” to invoke the LangGraph tool node.
 2. Observe Supabase tables filling with a session row plus one event per message.
