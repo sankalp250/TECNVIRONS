@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Realtime AI Session</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="pane pane--controls">
+        <h1>Realtime AI Backend Demo</h1>
+        <div class="field-grid">
+          <label>
+            Backend Host (ws:// or wss://)
+            <input id="host-input" type="text" value="ws://localhost:8000" />
+          </label>
+          <label>
+            Session ID
+            <div class="input-with-button">
+              <input id="session-input" type="text" placeholder="uuid-1234" />
+              <button id="generate-session" type="button">Generate</button>
+            </div>
+          </label>
+          <label>
+            User ID
+            <input id="user-input" type="text" value="founder-1" />
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="connect-btn" class="primary">Connect</button>
+          <button id="disconnect-btn" class="ghost" disabled>Disconnect</button>
+        </div>
+        <div id="status-light" class="status status--disconnected">Disconnected</div>
+      </section>
+
+      <section class="pane pane--chat">
+        <div id="feed" class="feed" aria-live="polite"></div>
+        <form id="message-form" class="message-form">
+          <input
+            id="message-input"
+            type="text"
+            placeholder="Ask Zephyr about weather, pricing, co2..."
+            autocomplete="off"
+            disabled
+          />
+          <button type="submit" disabled>Send</button>
+        </form>
+      </section>
+    </main>
+
+    <template id="entry-template">
+      <article class="entry">
+        <span class="entry-meta"></span>
+        <p class="entry-body"></p>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+
