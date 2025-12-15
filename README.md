@@ -64,7 +64,14 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 2. Send either raw text or `{ "message": "your text" }`.
 3. Receive streaming tokens until `[END_OF_RESPONSE]`.
 
-### Basic HTML Frontend
+### Live Demo
+
+- **Backend (Render)**: `https://tecnvirons.onrender.com`  
+  - Health: `https://tecnvirons.onrender.com/healthz`  
+  - WebSocket base: `wss://tecnvirons.onrender.com/ws/session/{session_id}?user_id={user_id}`
+- **Frontend (Vercel)**: `https://tecnvirons-git-master-sankalp-singhs-projects-08580eee.vercel.app/`
+
+### Basic HTML Frontend (local)
 Located in `frontend/` and intentionally framework-free.
 
 ```powershell
