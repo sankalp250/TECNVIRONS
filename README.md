@@ -1,110 +1,292 @@
-## Realtime AI Backend (FastAPI + Supabase + Groq)
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"/>
+  <img src="https://img.shields.io/badge/LangChain-121212?style=for-the-badge&logo=chainlink&logoColor=white" alt="LangChain"/>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+</p>
 
-This assignment-ready backend demonstrates a realtime conversational stack featuring WebSockets, LangGraph-orchestrated Groq interactions, Supabase persistence, and async post-session automation. The server streams Groq tokens to clients in near‑realtime while logging every step to Supabase for later automation.
+<h1 align="center">🤖 TECNVIRONS</h1>
+<h3 align="center">Realtime AI Conversational Backend</h3>
 
-### Architecture at a Glance
-- **FastAPI WebSocket endpoint** `ws://host/ws/session/{session_id}` accepts JSON or raw text payloads and streams response tokens back as they are produced.
-- **LangGraph router** classifies each user turn, optionally executing a simulated internal tool (`knowledge_base_lookup`) before shaping the final system prompt sent to Groq through LangChain.
-- **Supabase Postgres** stores a `sessions` record plus detailed `session_events` for each user/AI turn, enabling analytics and the post-session automation step.
-- **Post-session automation** (triggered on disconnect) replays event logs, summarizes the full conversation via Groq, and finalizes the session record with summary + end timestamps.
+<p align="center">
+  <strong>A production-ready backend demonstrating realtime conversational AI with WebSockets, LangGraph orchestration, Groq LLM integration, and Supabase persistence.</strong>
+</p>
 
-### Setup
-```powershell
-# 1. Create and activate a virtual environment (PowerShell)
-cd D:\TECNVIRONS
+<p align="center">
+  <a href="https://tecnvirons.onrender.com/healthz">
+    <img src="https://img.shields.io/badge/Backend-Live-brightgreen?style=flat-square" alt="Backend Status"/>
+  </a>
+  <a href="https://tecnvirons-git-master-sankalp-singhs-projects-08580eee.vercel.app/">
+    <img src="https://img.shields.io/badge/Frontend-Live-blue?style=flat-square" alt="Frontend Status"/>
+  </a>
+  <a href="https://github.com/sankalp250/TECNVIRONS/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License"/>
+  </a>
+</p>
+
+---
+
+## 📖 Overview
+
+TECNVIRONS is a sophisticated realtime AI backend that streams Groq LLM tokens to clients via WebSockets while maintaining comprehensive session logs in Supabase. The system leverages LangGraph for intelligent routing and tool execution, enabling extensible conversational workflows.
+
+### ✨ Key Features
+
+- 🔄 **Real-time Streaming** — WebSocket-based token streaming for low-latency responses
+- 🧠 **LangGraph Orchestration** — Intelligent routing with tool execution capabilities
+- 💾 **Persistent Sessions** — Full conversation history stored in Supabase
+- ⚡ **Async Architecture** — Non-blocking IO for high concurrency
+- 📝 **Auto-Summarization** — Automatic session summaries on disconnect
+- 🚀 **Production Ready** — Deployed on Render (backend) + Vercel (frontend)
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐     WebSocket      ┌──────────────────────────────────────┐
+│                 │◄──────────────────►│           FastAPI Server             │
+│   Frontend UI   │    Token Stream    │                                      │
+│    (Vanilla)    │                    │  ┌────────────────────────────────┐  │
+└─────────────────┘                    │  │     LangGraph Router           │  │
+                                       │  │  ┌─────────┐  ┌─────────────┐  │  │
+                                       │  │  │Classify │─►│ Tool Node   │  │  │
+                                       │  │  └─────────┘  └─────────────┘  │  │
+                                       │  │       │              │         │  │
+                                       │  │       └──────┬───────┘         │  │
+                                       │  │              ▼                 │  │
+                                       │  │       ┌─────────────┐          │  │
+                                       │  │       │ Prepare     │          │  │
+                                       │  │       │ Response    │          │  │
+                                       │  │       └─────────────┘          │  │
+                                       │  └────────────────────────────────┘  │
+                                       │                 │                    │
+                                       │                 ▼                    │
+                                       │  ┌────────────────────────────────┐  │
+                                       │  │        Groq Streamer           │  │
+                                       │  │    (LangChain ChatGroq)        │  │
+                                       │  └────────────────────────────────┘  │
+                                       └──────────────────────────────────────┘
+                                                         │
+                                                         ▼
+                                       ┌──────────────────────────────────────┐
+                                       │         Supabase Postgres            │
+                                       │  ┌──────────────┐ ┌───────────────┐  │
+                                       │  │   sessions   │ │session_events │  │
+                                       │  └──────────────┘ └───────────────┘  │
+                                       └──────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.10+
+- [Groq API Key](https://console.groq.com/)
+- [Supabase Project](https://supabase.com/)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/sankalp250/TECNVIRONS.git
+cd TECNVIRONS
+
+# Create virtual environment
 python -m venv .venv
+
+# Activate (Windows PowerShell)
 .venv\Scripts\Activate.ps1
 
-# 2. Install dependencies
+# Activate (Linux/macOS)
+source .venv/bin/activate
+
+# Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 3. Provide required secrets
-copy env.example .env  # then edit values
+# Configure environment
+cp env.example .env
+# Edit .env with your credentials
 ```
 
-#### Required environment variables
-| Name | Description |
-| --- | --- |
-| `GROQ_API_KEY` | Your Groq API key |
-| `GROQ_MODEL` | Optional override, defaults to `llama-3.1-70b-versatile` |
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key with insert/update permissions |
-| `SUPABASE_SCHEMA` | Optional schema name (defaults to `public`) |
+### Environment Variables
 
-`env.example` inside the repo already mirrors the variables above for quick sharing.
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GROQ_API_KEY` | Your Groq API key | ✅ |
+| `SUPABASE_URL` | Supabase project URL | ✅ |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key with insert/update permissions | ✅ |
+| `GROQ_MODEL` | Model override (default: `llama-3.1-70b-versatile`) | ❌ |
+| `SUPABASE_SCHEMA` | Schema name (default: `public`) | ❌ |
 
-### Supabase Schema
+### Database Setup
+
+Execute the following SQL in your Supabase SQL Editor:
+
 ```sql
-create table public.sessions (
-  session_id uuid primary key,
-  user_id text not null,
-  status text not null default 'active',
-  start_time timestamptz default now(),
-  end_time timestamptz,
-  summary text
+-- Sessions table
+CREATE TABLE public.sessions (
+  session_id UUID PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
+  start_time TIMESTAMPTZ DEFAULT NOW(),
+  end_time TIMESTAMPTZ,
+  summary TEXT
 );
 
-create table public.session_events (
-  id bigint generated by default as identity primary key,
-  session_id uuid not null references public.sessions(session_id) on delete cascade,
-  event_type text not null,
-  payload jsonb not null,
-  occurred_at timestamptz not null default now()
+-- Session events table
+CREATE TABLE public.session_events (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  session_id UUID NOT NULL REFERENCES public.sessions(session_id) ON DELETE CASCADE,
+  event_type TEXT NOT NULL,
+  payload JSONB NOT NULL,
+  occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create index session_events_session_idx on public.session_events(session_id, occurred_at);
+-- Index for performance
+CREATE INDEX session_events_session_idx 
+  ON public.session_events(session_id, occurred_at);
 ```
 
-### Running the WebSocket Server
-```powershell
+### Run the Server
+
+```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
-1. Connect via WebSocket: `ws://localhost:8000/ws/session/<uuid>?user_id=alice`
-2. Send either raw text or `{ "message": "your text" }`.
-3. Receive streaming tokens until `[END_OF_RESPONSE]`.
 
-### Live Demo
+---
 
-- **Backend (Render)**: `https://tecnvirons.onrender.com`  
-  - Health: `https://tecnvirons.onrender.com/healthz`  
-  - WebSocket base: `wss://tecnvirons.onrender.com/ws/session/{session_id}?user_id={user_id}`
-- **Frontend (Vercel)**: `https://tecnvirons-git-master-sankalp-singhs-projects-08580eee.vercel.app/`
+## 📡 API Reference
 
-### Basic HTML Frontend (local)
-Located in `frontend/` and intentionally framework-free.
+### WebSocket Endpoint
 
-```powershell
-# from repo root, after backend is running
-cd frontend
-# use any static server (examples):
-python -m http.server 4173
-# or open index.html directly in a browser (no build step required)
+```
+ws://localhost:8000/ws/session/{session_id}?user_id={user_id}
 ```
 
-Once opened:
-1. For local dev keep `ws://localhost:8000`; in production with Render use `wss://tecnvirons.onrender.com`.
-2. Generate a session ID (or paste your own) and click **Connect**.
-3. Type a prompt. The UI streams AI tokens live; `[END_OF_RESPONSE]` is handled automatically.
-4. Use **Disconnect** to trigger the backend’s post-session summary.
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `session_id` | UUID | Unique session identifier |
+| `user_id` | String | User identifier |
 
-### Deploying on Render (backend) + Vercel (frontend)
-- **Backend (Render)**: the repo includes `render.yaml`. On Render, create a new Web Service from the GitHub repo, set the environment to Python, and add env vars: `GROQ_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and (optional) `GROQ_MODEL` / `SUPABASE_SCHEMA`. Render will run `uvicorn app.main:app --host 0.0.0.0 --port 10000`. Health check: `/healthz`.
-- **Frontend (Vercel)**: create a new Vercel project pointing to `frontend/`. Framework: “Other” (no build). Output/public dir: `frontend`. In the UI, set the WebSocket host to your Render URL using `wss://<render-app>.onrender.com`.
+### Message Format
 
-### Testing the Flow
-1. Send a prompt mentioning “weather”, “pricing”, or “co2” to invoke the LangGraph tool node.
-2. Observe Supabase tables filling with a session row plus one event per message.
-3. Close the socket to trigger the final summary job; verify the `summary`, `end_time`, and `status` fields update in `sessions`.
+**Send:**
+```json
+{ "message": "Your prompt here" }
+```
+Or plain text: `"Your prompt here"`
 
-### Key Design Choices
-- **LangGraph over ad-hoc logic:** The router/tool/prepare nodes keep routing transparent and easily extensible for future tools (e.g., Supabase lookups, vector search).
-- **Streaming-first Groq integration:** `GroqStreamer` encapsulates LangChain’s `ChatGroq.astream`, ensuring the WebSocket sends low-latency tokens without blocking the event loop.
-- **Async Supabase wrapper:** All DB writes are executed through `asyncio.to_thread` so the synchronous Supabase client never blocks the FastAPI loop.
-- **Deterministic automation trigger:** Finalization runs exactly once per disconnect, ensuring summaries and timing metadata remain consistent even if clients exit unexpectedly.
+**Receive:**
+- Streaming tokens as text frames
+- `[END_OF_RESPONSE]` marker signals completion
 
-### Next Steps
-- Add authentication (JWT or Supabase Auth) to secure session creation.
-- Extend `KnowledgeBaseTool` into real function-calling flows (e.g., call an internal REST API).
-- Emit Server-Sent Events mirror for analytics dashboards.
+### Health Check
 
+```
+GET /healthz
+```
+
+---
+
+## 🌐 Live Demo
+
+| Service | URL |
+|---------|-----|
+| **Backend API** | [tecnvirons.onrender.com](https://tecnvirons.onrender.com) |
+| **Health Check** | [tecnvirons.onrender.com/healthz](https://tecnvirons.onrender.com/healthz) |
+| **Frontend** | [Vercel App](https://tecnvirons-git-master-sankalp-singhs-projects-08580eee.vercel.app/) |
+| **WebSocket** | `wss://tecnvirons.onrender.com/ws/session/{session_id}?user_id={user_id}` |
+
+---
+
+## 🧪 Testing
+
+1. **Trigger Tool Execution** — Send prompts containing "weather", "pricing", or "co2"
+2. **Verify Persistence** — Check Supabase tables for session and event records
+3. **Test Summarization** — Disconnect to trigger automatic summary generation
+
+---
+
+## 📁 Project Structure
+
+```
+TECNVIRONS/
+├── app/
+│   ├── __init__.py          # Package initialization
+│   ├── config.py             # Environment configuration
+│   ├── main.py               # FastAPI application & WebSocket
+│   ├── langgraph_flow.py     # LangGraph routing logic
+│   ├── llm_stream.py         # Groq streaming wrapper
+│   ├── session_manager.py    # Session lifecycle management
+│   └── supabase_client.py    # Async Supabase operations
+├── frontend/
+│   ├── index.html            # Chat UI
+│   ├── style.css             # Styles
+│   └── app.js                # WebSocket client logic
+├── requirements.txt          # Python dependencies
+├── render.yaml               # Render deployment config
+├── env.example               # Environment template
+└── README.md
+```
+
+---
+
+## 🏛️ Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **LangGraph over ad-hoc logic** | Transparent routing, easily extensible for future tools |
+| **Streaming-first Groq integration** | Low-latency token delivery without blocking the event loop |
+| **Async Supabase wrapper** | Uses `asyncio.to_thread` to prevent synchronous client from blocking |
+| **Deterministic automation trigger** | Ensures summaries run exactly once per disconnect |
+
+---
+
+## 🚢 Deployment
+
+### Backend (Render)
+
+1. Create new Web Service from GitHub repo
+2. Set environment to **Python**
+3. Configure environment variables
+4. Render uses `render.yaml` configuration
+5. Health check endpoint: `/healthz`
+
+### Frontend (Vercel)
+
+1. Create new project pointing to `frontend/`
+2. Framework: **Other** (no build required)
+3. Output directory: `frontend`
+4. Update WebSocket URL to production endpoint
+
+---
+
+## 🛣️ Roadmap
+
+- [ ] JWT / Supabase Auth integration
+- [ ] Extended function-calling with real API integrations
+- [ ] Server-Sent Events for analytics dashboards
+- [ ] Rate limiting and usage quotas
+- [ ] Multi-model support
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  <strong>Built with ❤️ by <a href="https://github.com/sankalp250">Sankalp Singh</a></strong>
+</p>
